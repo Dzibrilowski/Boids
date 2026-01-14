@@ -12,8 +12,11 @@ std::vector<Fish> fishes;
 
 void drawFish(SDL_Renderer *r, Fish &f) {
     //if (f.tracked_fishes.size() == 0) SDL_SetRenderDrawColor(r,0,0,200,255);
-     SDL_SetRenderDrawColor(r,std::min(250, (int)f.tracked_fishes.size()*50),0,std::max(0, 250 - (int)f.tracked_fishes.size()*50),255);
-    SDL_FRect rect = {(float)f.x*2,(float)f.y*2,2,2};
+     SDL_SetRenderDrawColor(r,
+         std::min(250, (int)f.tracked_fishes.size()*25),
+         std::max(0, 250 - (int)f.tracked_fishes.size()*25),
+         std::max(0, 250 - (int)f.tracked_fishes.size()*25),255);
+    SDL_FRect rect = {(float)f.x*FISH_SIZE,(float)f.y*FISH_SIZE,FISH_SIZE,FISH_SIZE};
     //if (f.x > 1200 || f.x < 0 || f.y > 800 || f.y < 0 ){f.x = 600; f.y = 400;}
     SDL_RenderFillRect(r, &rect);
 
@@ -26,53 +29,20 @@ void drawFish(SDL_Renderer *r, Fish &f) {
 
 void update_fish_tracking() {
     for (Fish &f: fishes) {
+        f.close_fishes.clear();
+        f.tracked_fishes.clear();
+
         for (Fish &other_f: fishes) {
             if (&f == &other_f) continue;
 
-            bool is_tracked = false;
-            for (Fish* tracked_f: f.tracked_fishes) {
-                if (tracked_f == &other_f) {
-                    is_tracked = true;
-                    break;
-                }
-            }
-            bool is_too_close = false;
-            for (Fish* too_close_f: f.too_close_fishes) {
-                if (too_close_f == &other_f) {
-                    is_too_close = true;
-                    break;
-                }
-            }
-
-            UnitVector v = UnitVector(f.x,f.y,other_f.x,other_f.y);
-            UnitVector top_border = UnitVector(f.dir_vec.deg + f.view.shift);
-            UnitVector bottom_border = UnitVector(f.dir_vec.deg - f.view.shift);
-            // if (v.len < 80 && (v.deg > bottom_border.deg && v.deg < top_border.deg)) {
-            //     if (!is_tracked) f.tracked_fishes.push_back(&other_f);
-            //
-            // }
-            if ( v.len >= f.short_dist && v.len < f.view.length && (abs(f.dir_vec.deg - v.deg) < f.view.shift)) {
-                if (!is_tracked) f.tracked_fishes.push_back(&other_f);
+            UnitVector dist_vec = UnitVector(f.x,f.y,other_f.x,other_f.y);
+            if (  dist_vec.len < f.tracking_dist && (abs(f.dir_vec.deg - dist_vec.deg) < f.view_shift)) {
+                f.tracked_fishes.push_back(&other_f);
 
             }
-            else if (is_tracked) {
-                auto it = std::find(f.tracked_fishes.begin(),f.tracked_fishes.end(),&other_f);
-                if (it != f.tracked_fishes.end()) {
-                    f.tracked_fishes.erase(it);
-                }
+            if (dist_vec.len < f.close_dist ) {
+                f.close_fishes.push_back(&other_f);
             }
-
-            if (v.len < f.short_dist ) {
-                if (!is_too_close) f.too_close_fishes.push_back(&other_f);
-            }
-            else if (is_too_close) {
-                auto it = std::find(f.too_close_fishes.begin(),f.too_close_fishes.end(),&other_f);
-                if (it != f.too_close_fishes.end()) {
-                    f.too_close_fishes.erase(it);
-                }
-            }
-
-            if (v.len < f.crit_dist){ f.is_crit_dist_reached = true;}
         }
     }
 }
@@ -84,19 +54,19 @@ int main() {
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Window* w = SDL_CreateWindow(
         "sea",
-        1200,
-        800,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT,
         0
         );
     SDL_Renderer* r = SDL_CreateRenderer(w,NULL);
 
-    SDL_Texture* canvas = SDL_CreateTexture(r, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1200, 800);
+    SDL_Texture* canvas = SDL_CreateTexture(r, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, SCREEN_WIDTH, SCREEN_HEIGHT);
     SDL_SetTextureBlendMode(canvas, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
     SDL_RenderClear(r);
 
-    for (int i = 0; i<500 ; i++) {
-        fishes.push_back(Fish(getRand(0,600),getRand(0,400),getRand(0,1),22,70, .5));
+    for (int i = 0; i<1000 ; i++) {
+        fishes.push_back(Fish(getRand(0,SCREEN_WIDTH/FISH_SIZE),getRand(0,SCREEN_HEIGHT/FISH_SIZE),getRand(0,360)));
     }
 
     bool running = true;
@@ -117,7 +87,7 @@ int main() {
         update_fish_tracking();
         for (Fish &f: fishes) {
             f.move();
-            if (f.x< 0 || f.y < 0 || f.x > 600 || f.y > 400) { f.x = 300; f.y = 200;}
+            //if (f.x< 0 || f.y < 0 || f.x > 600 || f.y > 400) { f.x = 300; f.y = 200;}
             drawFish(r, f);
         }
 
@@ -127,7 +97,7 @@ int main() {
         SDL_RenderTexture(r, canvas, NULL , NULL);
 
         SDL_RenderPresent(r);
-        SDL_Delay(5);
+        SDL_Delay(0);
     }
 
     SDL_DestroyWindow(w);

@@ -11,5 +11,9 @@
 inline double getRand(double min, double max) {
     return  (double)rand()/RAND_MAX * (max-min) + min;
 }
+static inline const int SCREEN_WIDTH = 1200;
+static inline const int SCREEN_HEIGHT = 800;
+static inline const int FISH_SIZE = 2;
+
 
 #endif //SEASIM_UTILS_H

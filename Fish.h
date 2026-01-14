@@ -10,24 +10,19 @@
 
 
 class Fish {
-    struct View {
-        double length;
-        double shift;
-    };
 public:
-    View view;
-    double short_dist = 5;
-    double crit_dist = 5;
-    bool is_crit_dist_reached = false;
     double x, y;
     UnitVector dir_vec;
-    double shift;
-    double speed;
+    double close_dist = 5;
+    double tracking_dist = 40;
+    double move_shift = 30;
+    double view_shift = 60;
+    double speed = 1;
     std::vector<Fish*> tracked_fishes;
-    std::vector<Fish*> too_close_fishes;
+    std::vector<Fish*> close_fishes;
 
 
-    Fish(double x, double y, double dir, double shift, double view_shift,  double speed = 1): x(x), y(y), dir_vec(UnitVector(dir)), shift(shift), speed(speed){ view.shift = view_shift; view.length = 40;}
+    Fish(double x, double y, double dir): x(x), y(y), dir_vec(UnitVector(dir)){}
     void move();
 
 
