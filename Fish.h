@@ -14,9 +14,9 @@ public:
     double x, y;
     UnitVector dir_vec;
     double close_dist = 5;
-    double tracking_dist = 40;
-    double move_shift = 30;
-    double view_shift = 60;
+    double tracking_dist = 60;
+    double move_shift = 25;
+    double view_shift = 50;
     double speed = 1;
     std::vector<Fish*> tracked_fishes;
     std::vector<Fish*> close_fishes;

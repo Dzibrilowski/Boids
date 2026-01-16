@@ -13,10 +13,10 @@ public:
     double x, y, deg;
     double len = 1;
     UnitVector(double degree);
-    UnitVector(double x1, double y1, double x2, double y2);
+    UnitVector(double x1, double y1, double x2, double y2, bool on_torus = false);
 
     void setVector(double new_deg);
-    void setVector(double x1, double y1, double x2, double y2);
+    void setVector(double x1, double y1, double x2, double y2, bool on_torus = false);
 };
 
 
