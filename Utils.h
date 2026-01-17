@@ -22,7 +22,7 @@ inline double getClosestWay(double num, double length) {
     else if ( num < -length/2) num+= length;
     return num;
 }
-static inline const int SCREEN_WIDTH = 1200;
+static inline const int SCREEN_WIDTH = 1400;
 static inline const int SCREEN_HEIGHT = 800;
 static inline const int SEA_WIDTH = SCREEN_HEIGHT;
 static inline const int SEA_HEIGHT = SCREEN_HEIGHT;
@@ -31,8 +31,19 @@ static inline const int UI_HEIGHT = SCREEN_HEIGHT;
 
 static inline const int CHAR_SIZE = 16;
 
-
 static inline const int FISH_SIZE = 2;
+static int fish_r = 200;
+static int fish_g = 0;
+static int fish_b = 0;
+
+static int focus_r = 10;
+static int focus_g = 200;
+static int focus_b = 200;
+
+static int blur = 15;
+static int delay = 5;
+
+static int fish_num  = 500;
 
 
 #endif //SEASIM_UTILS_H

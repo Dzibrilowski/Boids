@@ -13,11 +13,12 @@ class Fish {
 public:
     double x, y;
     UnitVector dir_vec;
-    double close_dist = 5;
-    double tracking_dist = 60;
-    double move_shift = 25;
-    double view_shift = 50;
-    double speed = 1;
+    static int close_dist;
+    static int tracking_dist;
+    static int move_shift;
+    static int view_shift;
+    static int speed;
+    static int focus_num;
     std::vector<Fish*> tracked_fishes;
     std::vector<Fish*> close_fishes;
 

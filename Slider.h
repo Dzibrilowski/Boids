@@ -17,17 +17,23 @@ public:
     double width = SCREEN_WIDTH - SEA_WIDTH;
     float height = CHAR_SIZE * 2;
     float range_bold = 4;
-    float padding = 128;
-    float scroll_val = 0;
+
+    float scroll_range = 200;
+    float padding_right = CHAR_SIZE * 11;
+    float padding_left = UI_WIDTH - padding_right - scroll_range;
+
+    float scroll_val;
     float scroll_max_val;
     float scroll_size = 16;
-    float scroll_range = SCREEN_WIDTH - SEA_WIDTH - padding*2;
     std::string description;
 
-    Slider(SDL_Renderer *r, SDL_Texture* font_bmp, double y, float scroll_max_val, std::string description ): r(r), font_bmp(font_bmp), y(y), scroll_max_val(scroll_max_val), description(description) {}
+    int* val_to_change;
+
+    Slider(SDL_Renderer *r, SDL_Texture* font_bmp, double y, int* val_to_change, float scroll_max_val, std::string description ):
+    r(r), font_bmp(font_bmp), y(y), val_to_change(val_to_change), scroll_max_val(scroll_max_val), description(description) {scroll_val = *val_to_change/scroll_max_val;}
     void drawSlider();
     void drawScroll();
-    float getScrollPos(){return SEA_WIDTH + padding + (scroll_val)*scroll_range;}
+    float getScrollPos(){return SEA_WIDTH + padding_left + (scroll_val)*scroll_range;}
     void setScrollPos(float pos);
     void drawVal();
     void drawDescription();

@@ -13,10 +13,12 @@ std::vector<Fish> fishes;
 
 
 void drawFish(SDL_Renderer *r, Fish &f) {
+    double focus_f = std::min((double)f.tracked_fishes.size() / f.focus_num,1.0);
      SDL_SetRenderDrawColor(r,
-         std::min(250, (int)f.tracked_fishes.size()*25),
-         std::max(0, 250 - (int)f.tracked_fishes.size()*25),
-         std::max(0, 250 - (int)f.tracked_fishes.size()*25),255);
+         (int)(fish_r*(1 - focus_f)+focus_r*focus_f),
+         (int)(fish_g*(1 - focus_f)+focus_g*focus_f),
+         (int)(fish_b*(1 - focus_f)+focus_b*focus_f),
+          255);
     SDL_FRect rect = {(float)f.x*FISH_SIZE,(float)f.y*FISH_SIZE,FISH_SIZE,FISH_SIZE};
     SDL_RenderFillRect(r, &rect);
 
@@ -54,6 +56,7 @@ int main() {
     srand(time(nullptr));
 
     SDL_Init(SDL_INIT_VIDEO);
+
     SDL_Window* w = SDL_CreateWindow(
         "sea",
         SCREEN_WIDTH,
@@ -78,10 +81,31 @@ int main() {
     SDL_Texture* font_texture = SDL_CreateTextureFromSurface(r,font_surface);
     SDL_SetTextureBlendMode(font_texture, SDL_BLENDMODE_BLEND);
 
+    float first_slider_y = CHAR_SIZE*2;
     std::vector<Slider> sliders;
-    sliders.push_back(Slider(r, font_texture,129,40,"dupa"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 2,&Fish::tracking_dist,200,"track dist"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 4,&Fish::close_dist,100,"close dist"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 6,&Fish::move_shift,180,"move shift"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 8,&Fish::view_shift,180,"view shift"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 10,&Fish::focus_num,100,"focus num"));
 
-    for (int i = 0; i<500 ; i++) {
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 14,&fish_r,255,"fish r"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 16,&fish_g,255,"fish g"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 18,&fish_b,255,"fish b"));
+
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 22,&focus_r,255,"focus r"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 24,&focus_g,255,"focus g"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 26,&focus_b,255,"focus b"));
+
+
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 30,&Fish::speed,10,"speed"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 32,&blur,255,"blur"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 34,&delay,100,"delay ms"));
+
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 38,&fish_num,2000,"fishes num"));
+
+
+    for (int i = 0; i<fish_num ; i++) {
         fishes.push_back(Fish(getRand(0,SEA_WIDTH/FISH_SIZE),getRand(0,SEA_HEIGHT/FISH_SIZE),getRand(0,360)));
     }
 
@@ -97,8 +121,8 @@ int main() {
                     float mouse_x = e.motion.x;
                 float mouse_y = e.motion.y;
                 for (Slider &s: sliders) {
-                    if (mouse_x >= SEA_WIDTH + s.padding && mouse_x <= SCREEN_WIDTH - s.padding &&
-                        mouse_y >= s.y - s.height * 3/2 && mouse_y <= s.y + s.height * 3/2) {
+                    if (mouse_x >= SEA_WIDTH + s.padding_left && mouse_x <= SCREEN_WIDTH - s.padding_right &&
+                        mouse_y >= s.y  && mouse_y <= s.y + s.height ) {
                         s.setScrollPos(mouse_x);
                     }
                 }
@@ -111,14 +135,26 @@ int main() {
         SDL_SetRenderTarget(r, sea_texture);
 
         SDL_SetRenderDrawBlendMode(r, SDL_BLENDMODE_BLEND);
-        SDL_SetRenderDrawColor(r,0,0,0,15);
+        SDL_SetRenderDrawColor(r,0,0,0,blur);
         SDL_RenderFillRect(r,NULL);
+
+        if (fish_num < fishes.size()) {
+            for (int i = 0; i<fishes.size()-fish_num; i++) {
+                fishes.pop_back();
+            }
+        }
+        if (fish_num > fishes.size()) {
+            for (int i = 0; i<fish_num - fishes.size(); i++) {
+                fishes.push_back(Fish(getRand(0,SEA_WIDTH/FISH_SIZE),getRand(0,SEA_HEIGHT/FISH_SIZE),getRand(0,360)));
+            }
+        }
 
         update_fish_tracking();
         for (Fish &f: fishes) {
             f.move();
             drawFish(r, f);
         }
+
 
         SDL_SetRenderTarget(r, NULL);
         SDL_SetRenderDrawColor(r, 0, 0, 0, 255);
@@ -132,13 +168,12 @@ int main() {
         SDL_SetRenderDrawColor(r, 40, 40, 50, 255);
         SDL_RenderFillRect(r, &ui_rect);
 
-        drawText(r,font_texture,"N4pIS t3sst0wy :",20,20);
         for (Slider &s : sliders) {
             s.drawSlider();
         }
 
         SDL_RenderPresent(r);
-        SDL_Delay(5);
+        SDL_Delay(delay);
     }
     SDL_DestroyTexture(font_texture);
     SDL_DestroyTexture(sea_texture);

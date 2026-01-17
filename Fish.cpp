@@ -8,6 +8,13 @@
 
 #include "Utils.h"
 
+int Fish::close_dist = 5;
+int Fish::tracking_dist = 60;
+int Fish::move_shift = 25;
+int Fish::view_shift = 50;
+int Fish::speed = 1;
+int Fish::focus_num = 4;
+
 void Fish::move() {
 
     if (tracked_fishes.size() > 0) {
@@ -52,8 +59,8 @@ void Fish::move() {
 
         else {
             UnitVector rand_v = UnitVector(getRand(dir_vec.deg-move_shift, dir_vec.deg+move_shift));
-
-            dir_vec.setVector(0,0,dir_v.x+pos_v.x + 4*rand_v.x/tracked_fishes.size(),dir_v.y+pos_v.y + 4*rand_v.y/tracked_fishes.size());
+            double focus_factor = std::min((double)focus_num/(double)tracked_fishes.size(),1.0);
+            dir_vec.setVector(0,0,dir_v.x+pos_v.x + focus_factor*rand_v.x,dir_v.y+pos_v.y + focus_factor *rand_v.y);
 
         }
     }

@@ -7,6 +7,7 @@
 #include <string>
 #include <SDL3/SDL_render.h>
 
+
 void drawLetter(SDL_Renderer *r , SDL_Texture* font_bmp, int ascii , double x, double y) {
     if (ascii >= 97 && ascii <= 122) ascii-=32;
 
@@ -36,7 +37,7 @@ void drawLetter(SDL_Renderer *r , SDL_Texture* font_bmp, int ascii , double x, d
         src_x = 12;
         src_y = 1;
     }
-    SDL_FRect src = {(float)src_x*16,(float)src_y*16,16,16 };
+    SDL_FRect src = {(float)(src_x*16),(float)(src_y*16),16.0f,16.0f };
     SDL_FRect dst = {(float)x + SEA_WIDTH,(float)y,CHAR_SIZE,CHAR_SIZE};
 
     SDL_RenderTexture(r,font_bmp,&src,&dst);
