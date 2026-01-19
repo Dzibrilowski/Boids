@@ -19,6 +19,7 @@ public:
     static int view_shift;
     static int speed;
     static int focus_num;
+    static int close_factor;
     std::vector<Fish*> tracked_fishes;
     std::vector<Fish*> close_fishes;
 

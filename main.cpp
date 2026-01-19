@@ -19,7 +19,23 @@ void drawFish(SDL_Renderer *r, Fish &f) {
          (int)(fish_g*(1 - focus_f)+focus_g*focus_f),
          (int)(fish_b*(1 - focus_f)+focus_b*focus_f),
           255);
-    SDL_FRect rect = {(float)f.x*FISH_SIZE,(float)f.y*FISH_SIZE,FISH_SIZE,FISH_SIZE};
+
+    float pos_x_px = fish_size * f.x + center_x;
+    float pos_y_px = fish_size * f.y + center_y;
+
+    float map_w_px = MAP_WIDTH * fish_size;
+    float map_h_px = MAP_HEIGHT * fish_size;
+
+    float screen_x = fmod(pos_x_px, map_w_px);
+    if (screen_x < 0) screen_x += map_w_px;
+
+    float screen_y = fmod(pos_y_px, map_h_px);
+    if (screen_y < 0) screen_y += map_h_px;
+
+    SDL_FRect rect = {
+        screen_x,
+        screen_y,
+        std::max((float)fish_size,1.0f),std::max((float)fish_size,1.0f)};
     SDL_RenderFillRect(r, &rect);
 
     // SDL_SetRenderDrawColor(r,200,200,0,255);
@@ -81,32 +97,37 @@ int main() {
     SDL_Texture* font_texture = SDL_CreateTextureFromSurface(r,font_surface);
     SDL_SetTextureBlendMode(font_texture, SDL_BLENDMODE_BLEND);
 
+    Slider* activeSlider;
+    bool world_dragging = false;
+    double last_mouse_x;
+    double last_mouse_y;
     float first_slider_y = CHAR_SIZE*2;
+
     std::vector<Slider> sliders;
-    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 2,&Fish::tracking_dist,200,"track dist"));
-    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 4,&Fish::close_dist,100,"close dist"));
+
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 2,&Fish::tracking_dist,1000,"track dist"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 4,&Fish::close_dist,200,"close dist"));
     sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 6,&Fish::move_shift,180,"move shift"));
     sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 8,&Fish::view_shift,180,"view shift"));
-    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 10,&Fish::focus_num,100,"focus num"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 10,&Fish::focus_num,100,"noise factor"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 12,&Fish::close_factor,100,"close factor"));
 
-    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 14,&fish_r,255,"fish r"));
-    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 16,&fish_g,255,"fish g"));
-    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 18,&fish_b,255,"fish b"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 16,&fish_r,255,"fish r"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 18,&fish_g,255,"fish g"));
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 20,&fish_b,255,"fish b"));
 
     sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 22,&focus_r,255,"focus r"));
     sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 24,&focus_g,255,"focus g"));
     sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 26,&focus_b,255,"focus b"));
 
-
     sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 30,&Fish::speed,10,"speed"));
     sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 32,&blur,255,"blur"));
     sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 34,&delay,100,"delay ms"));
 
-    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 38,&fish_num,2000,"fishes num"));
-
+    sliders.push_back(Slider(r, font_texture,first_slider_y + CHAR_SIZE * 38,&fish_num,1000,"fishes num"));
 
     for (int i = 0; i<fish_num ; i++) {
-        fishes.push_back(Fish(getRand(0,SEA_WIDTH/FISH_SIZE),getRand(0,SEA_HEIGHT/FISH_SIZE),getRand(0,360)));
+        fishes.push_back(Fish(getRand(0,MAP_WIDTH),getRand(0,MAP_HEIGHT),getRand(0,360)));
     }
 
     bool running = true;
@@ -116,20 +137,65 @@ int main() {
             if (e.type == SDL_EVENT_QUIT) {
                 running = false;
             }
-            if (e.type == SDL_EVENT_MOUSE_MOTION) {
-                if (e.motion.state && SDL_BUTTON_LMASK) {
-                    float mouse_x = e.motion.x;
-                float mouse_y = e.motion.y;
-                for (Slider &s: sliders) {
+            if (e.type ==  SDL_EVENT_MOUSE_BUTTON_DOWN) {
+                float mouse_x = e.button.x;
+                float mouse_y = e.button.y;
+                if (mouse_x >=0 && mouse_x < SEA_WIDTH && mouse_y >=0 && mouse_y < SEA_HEIGHT) {
+                    last_mouse_x = mouse_x;
+                    last_mouse_y = mouse_y;
+                    world_dragging = true;
+                }
+                else {
+                    for (Slider &s: sliders) {
                     if (mouse_x >= SEA_WIDTH + s.padding_left && mouse_x <= SCREEN_WIDTH - s.padding_right &&
                         mouse_y >= s.y  && mouse_y <= s.y + s.height ) {
-                        s.setScrollPos(mouse_x);
+                        activeSlider = &s;
+                        break;
                     }
                 }
                 }
 
             }
+            if (e.type == SDL_EVENT_MOUSE_BUTTON_UP) { activeSlider = nullptr; world_dragging = false; }
+            if (e.type == SDL_EVENT_MOUSE_WHEEL) {
+                float mouse_x , mouse_y;
+                SDL_GetMouseState(&mouse_x,&mouse_y);
+                if (mouse_x >=0 && mouse_x < SEA_WIDTH && mouse_y >=0 && mouse_y < SEA_HEIGHT ) {
+                    float old_size = fish_size;
+                    float world_x = (mouse_x - center_x) / old_size;
+                    float world_y = (mouse_y - center_y) / old_size;
 
+                    fish_size *= 1 + e.wheel.y*0.1f;
+                    fish_size = std::clamp(fish_size,(float)SEA_WIDTH/MAP_WIDTH,10.f);
+
+                    center_x = mouse_x - world_x * fish_size;
+                    center_y = mouse_y - world_y * fish_size;
+
+                    SDL_SetRenderTarget(r,sea_texture);
+                    SDL_SetRenderDrawColor(r,0,0,0,255);
+                    SDL_RenderClear(r);
+                    SDL_SetRenderTarget(r, NULL);
+                }
+            }
+        }
+
+        if (activeSlider != nullptr) {
+            float mouse_x , mouse_y;
+            SDL_GetMouseState(&mouse_x,&mouse_y);
+            activeSlider->setScrollPos(mouse_x);
+        }
+        if (world_dragging) {
+            float mouse_x , mouse_y;
+            SDL_GetMouseState(&mouse_x,&mouse_y);
+            center_x+= mouse_x - last_mouse_x;
+            center_y+= mouse_y - last_mouse_y;
+            last_mouse_x = mouse_x;
+            last_mouse_y = mouse_y;
+
+            SDL_SetRenderTarget(r,sea_texture);
+            SDL_SetRenderDrawColor(r,0,0,0,255);
+            SDL_RenderClear(r);
+            SDL_SetRenderTarget(r, NULL);
         }
 
         SDL_SetRenderTarget(r, sea_texture);
@@ -145,7 +211,7 @@ int main() {
         }
         if (fish_num > fishes.size()) {
             for (int i = 0; i<fish_num - fishes.size(); i++) {
-                fishes.push_back(Fish(getRand(0,SEA_WIDTH/FISH_SIZE),getRand(0,SEA_HEIGHT/FISH_SIZE),getRand(0,360)));
+                fishes.push_back(Fish(getRand(0,MAP_WIDTH),getRand(0,MAP_HEIGHT),getRand(0,360)));
             }
         }
 

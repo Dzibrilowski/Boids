@@ -28,10 +28,11 @@ static inline const int SEA_WIDTH = SCREEN_HEIGHT;
 static inline const int SEA_HEIGHT = SCREEN_HEIGHT;
 static inline const int UI_WIDTH = SCREEN_WIDTH - SEA_WIDTH;
 static inline const int UI_HEIGHT = SCREEN_HEIGHT;
-
+static inline const int MAP_WIDTH = 4000;
+static inline const int MAP_HEIGHT = 4000;
 static inline const int CHAR_SIZE = 16;
 
-static inline const int FISH_SIZE = 2;
+
 static int fish_r = 200;
 static int fish_g = 0;
 static int fish_b = 0;
@@ -44,6 +45,9 @@ static int blur = 15;
 static int delay = 5;
 
 static int fish_num  = 500;
+static float fish_size = 1;
 
+static float center_x = SEA_WIDTH/fish_size/2;
+static float center_y = SEA_HEIGHT/fish_size/2;
 
 #endif //SEASIM_UTILS_H

@@ -17,10 +17,10 @@ UnitVector::UnitVector(double x1, double y1, double x2, double y2, bool on_torus
     double dx = x2 - x1;
     double dy = y2 - y1;
     if (on_torus) {
-        if ( dx > SEA_WIDTH/2 / FISH_SIZE) dx-= SEA_WIDTH / FISH_SIZE;
-        else if ( dx < -SEA_WIDTH/2/ FISH_SIZE) dx+= SEA_WIDTH / FISH_SIZE;
-        if ( dy > SEA_HEIGHT/2/ FISH_SIZE) dy-= SEA_HEIGHT/ FISH_SIZE;
-        else if ( dy < -SEA_HEIGHT/2/ FISH_SIZE) dy+= SEA_HEIGHT/ FISH_SIZE;
+        if ( dx > MAP_WIDTH/2) dx-= MAP_WIDTH;
+        else if ( dx < -MAP_WIDTH/2) dx+= SEA_WIDTH;
+        if ( dy > MAP_HEIGHT/2) dy-= MAP_HEIGHT;
+        else if ( dy < -MAP_HEIGHT/2) dy+= MAP_HEIGHT;
     }
 
     len = sqrt(dx*dx + dy*dy);
@@ -44,10 +44,10 @@ void UnitVector::setVector(double x1, double y1, double x2, double y2, bool on_t
     double dx = x2 - x1;
     double dy = y2 - y1;
     if (on_torus) {
-        if ( dx > SEA_WIDTH/2) dx-= SEA_WIDTH;
-        else if ( dx < -SEA_WIDTH/2) dx+= SEA_WIDTH;
-        if ( dy > SEA_HEIGHT/2) dy-= SEA_HEIGHT;
-        else if ( dy < -SEA_HEIGHT/2) dy+= SEA_HEIGHT;
+        if ( dx > MAP_WIDTH/2) dx-= MAP_WIDTH;
+        else if ( dx < -MAP_WIDTH/2) dx+= MAP_WIDTH;
+        if ( dy > MAP_HEIGHT/2) dy-= MAP_HEIGHT;
+        else if ( dy < -MAP_HEIGHT/2) dy+= MAP_HEIGHT;
     }
 
 

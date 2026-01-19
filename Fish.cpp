@@ -14,6 +14,7 @@ int Fish::move_shift = 25;
 int Fish::view_shift = 50;
 int Fish::speed = 1;
 int Fish::focus_num = 4;
+int Fish::close_factor = 2;
 
 void Fish::move() {
 
@@ -53,8 +54,8 @@ void Fish::move() {
             UnitVector esc_v = UnitVector(0,0,esc_x,esc_y);
 
 
-                dir_vec.setVector(0,0,dir_v.x+pos_v.x+esc_v.x*tracking_dist/close_dist,
-                    dir_v.y+pos_v.y+esc_v.y* tracking_dist/close_dist);
+                dir_vec.setVector(0,0,dir_v.x+pos_v.x+esc_v.x*close_factor,
+                    dir_v.y+pos_v.y+esc_v.y* close_factor);
         }
 
         else {
@@ -70,6 +71,9 @@ void Fish::move() {
     x += dir_vec.x * speed;
     y += dir_vec.y * speed;
 
-    x = fmod(x+SEA_WIDTH/FISH_SIZE, SEA_WIDTH/FISH_SIZE);
-    y = fmod(y+SEA_HEIGHT/FISH_SIZE, SEA_HEIGHT/FISH_SIZE);
+
+    x = fmod(x+MAP_WIDTH, MAP_WIDTH);
+    y = fmod(y+MAP_HEIGHT, MAP_HEIGHT);
+
+
 }
