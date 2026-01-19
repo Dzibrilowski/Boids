@@ -23,14 +23,14 @@ Sliders allow you to adjust many variables. Here's a closer look at how each one
 3. MOVE SHIFT - if fish dont follow others, it moves in scope of its direction +- MOVE SHIFT [in degrees]. For example, if fish current direction is 37 degrees and MOVE SHIFT = 20, in next iterion fish will be in the scope from 17 tp 57 degrees.
 4. VIEW SHIFT – Fish have a range of vision in which they can see others. This corresponds to the fish's direction +- VIEW OFFSET. Works as in the example above. If VIEW OFFSET = 180, fish can see all fish around them; if VIEW OFFSET = 0, fish can only see fish directly in front of them.
 5. NOISE FACTOR - sets the number of fishes to follow, to have full focus on follow. For example, if NOISE FACTOR = 10, if fish see 10 fishes, its direction depends on other fishes in 100%, but if fish see only 6 other fishes, its direction depend in 6/10 on other fishes and in 4/10 on random moving (MOVE SHIFT).
-6. CLOSE FACTOR - affects the force with which fish that are too close [CLOSE DIST & VIEW SHIFT] want to move away from each other
-7.1 FISH R , FISH G , FISH B - sets the rgb color of fish which moves randomly ( dont focus on anyone ).
-7.2 FOCUS R , FOCUS G , FOCUS B - sets the rgb color of fish which is fully focused on other fishes ( number of following fishes >= NOISE FACTOR ).
-7.3 every fish which follow more than 0 and less than NOISE FACTOR have blended color based on FISH rgb and FOCUS rgb.
-8. SPEED - represent number of units which fishes 'jumps' on every iteration.
-9. BLUR - value of transparency from 0 to 255 which is layered in every iteration. If blur = 255, fishes will dont have tails, if blur = 0, tails will not fade.
-10. DELAY MS - delay betweend every iteration in milliseconds.
-11. FISHES NUM - number of fishes in whole map
+6. CLOSE FACTOR - affects the force with which fish that are too close [CLOSE DIST & VIEW SHIFT] want to move away from each other.
+7. FISH R , FISH G , FISH B - sets the rgb color of fish which moves randomly ( dont focus on anyone ).
+8. FOCUS R , FOCUS G , FOCUS B - sets the rgb color of fish which is fully focused on other fishes ( number of following fishes >= NOISE FACTOR ).
+9. every fish which follow more than 0 and less than NOISE FACTOR have blended color based on FISH rgb and FOCUS rgb.
+10. SPEED - represent number of units which fishes 'jumps' on every iteration.
+11. BLUR - value of transparency from 0 to 255 which is layered in every iteration. If blur = 255, fishes will dont have tails, if blur = 0, tails will not fade.
+12. DELAY MS - delay betweend every iteration in milliseconds.
+13. FISHES NUM - number of fishes in whole map
     
 these settings allow you to create interesting effects:
 
