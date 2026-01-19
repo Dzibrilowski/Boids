@@ -97,7 +97,7 @@ int main() {
     SDL_Texture* font_texture = SDL_CreateTextureFromSurface(r,font_surface);
     SDL_SetTextureBlendMode(font_texture, SDL_BLENDMODE_BLEND);
 
-    Slider* activeSlider;
+    Slider* activeSlider = nullptr;
     bool world_dragging = false;
     double last_mouse_x;
     double last_mouse_y;
